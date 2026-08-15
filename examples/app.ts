@@ -16,8 +16,16 @@ import {
 
 export function makeButton(): Button {
   const button = new Button('Click me!')
-  button.className = 'btn btn-primary'
-  button.style.marginTop = 2
+  button.classList.add(
+    'm-8',
+    'rounded',
+    'bg-blue-600',
+    'px-4',
+    'py-2',
+    'font-medium',
+    'text-white',
+    'hover:bg-blue-700'
+  )
   let count = 0
   button.onClick(() => {
     count++
@@ -37,40 +45,70 @@ export class TodoItem extends ListItem {
   }
   set isDone(value: boolean) {
     this.done = value
-    this.label.style.textDecoration = value ? 'line-through' : 'none'
-    this.label.style.fontWeight = value ? 'normal' : 'bold'
-    this.label.style.color = value ? '#999' : '#000'
+    this.label.classList.toggle('line-through', value)
+    this.label.classList.toggle('text-gray-400', value)
+    this.label.classList.toggle('font-bold', !value)
   }
 
   constructor(text: string) {
     super()
-    this.className = 'list-group-item'
-    this.style.cursor = 'pointer'
+    this.classList.add(
+      'cursor-pointer',
+      'px-4',
+      'py-2',
+      'border-b',
+      'border-gray-200'
+    )
     this.label.text = text
-    this.label.style.fontWeight = 'bold'
+    this.label.classList.add('font-bold')
     this.appendChild(this.label)
   }
 }
 
 export function makeTodo(): Div {
   const items = new List()
-  items.className = 'list-group'
-  items.style.marginTop = '1em'
+  items.classList.add(
+    'mt-4',
+    'divide-y',
+    'divide-gray-200',
+    'rounded',
+    'border',
+    'border-gray-200'
+  )
 
   const heading = new Heading('Todo List')
+  heading.classList.add('text-2xl', 'font-bold')
   const subtitle = new Paragraph('This is the shared todo list of the world.')
+  subtitle.classList.add('text-gray-600')
   const count = new Paragraph('0 chars')
+  count.classList.add('text-gray-500', 'text-sm')
   const inputForm = new Form()
-  inputForm.className = 'form-inline'
+  inputForm.classList.add('mt-4', 'flex', 'items-center', 'gap-2')
   const input = new Input()
-  input.className = 'form-control'
+  input.classList.add('rounded', 'border', 'border-gray-300', 'px-3', 'py-2')
   const addBtn = new Button('Add')
   addBtn.type = 'submit'
-  addBtn.className = 'btn btn-primary'
-  addBtn.style.marginLeft = '1em'
+  addBtn.classList.add(
+    'rounded',
+    'bg-blue-600',
+    'px-4',
+    'py-2',
+    'font-medium',
+    'text-white',
+    'hover:bg-blue-700'
+  )
   const clearBtn = new Button('Clear Completed')
   clearBtn.type = 'submit'
-  clearBtn.className = 'btn btn-danger'
+  clearBtn.classList.add(
+    'mt-4',
+    'rounded',
+    'bg-red-600',
+    'px-4',
+    'py-2',
+    'font-medium',
+    'text-white',
+    'hover:bg-red-700'
+  )
 
   function updateCount() {
     count.text = `${input.value.length} chars`
@@ -97,6 +135,7 @@ export function makeTodo(): Div {
   })
 
   const app = new Div()
+  app.classList.add('mx-auto', 'max-w-xl', 'p-8')
   app.appendChild(heading)
   app.appendChild(subtitle)
   inputForm.appendChild(input)
@@ -112,15 +151,20 @@ export function makeTodo(): Div {
 
 export function makeIndex(): Div {
   const div = new Div()
+  div.classList.add('mx-auto', 'max-w-xl', 'p-8')
   const heading = new Heading('Ooui TypeScript/Bun port')
+  heading.classList.add('text-2xl', 'font-bold')
   const list = new List()
+  list.classList.add('mt-4', 'list-inside', 'list-disc')
   const items = [
     ['/button', 'Button Counter'],
     ['/todo', 'Todo List']
   ]
   for (const [href, label] of items) {
     const li = new ListItem()
-    li.appendChild(new Anchor(href, label))
+    const a = new Anchor(href, label)
+    a.classList.add('text-blue-600', 'hover:underline')
+    li.appendChild(a)
     list.appendChild(li)
   }
   div.appendChild(heading)

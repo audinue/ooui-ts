@@ -31,7 +31,7 @@ let server: Server<WSData> | null = null
 
 export let host = 'localhost'
 export let port = 8080
-export let headHtml = `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" />`
+export let headHtml = `<script src="https://cdn.tailwindcss.com"></script>`
 export let bodyHeaderHtml = ''
 export let bodyFooterHtml = ''
 
@@ -101,7 +101,7 @@ export function renderTemplate(
 </head>
 <body>
 ${bodyHeaderHtml}
-<div id="ooui-body" class="container-fluid" style="padding:0;margin:0">
+<div id="ooui-body">
 ${initialHtml}
 </div>
 

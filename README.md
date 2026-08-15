@@ -7,11 +7,15 @@ a WebSocket. All app logic and state live on the server; the client is a thin
 
 Ported: the core element model (`Node`/`Element`/`Document`/`Window`/`Body`),
 the full message protocol (`create`/`set`/`setAttr`/`remAttr`/`call`/`listen`/`event`),
-inline styles, and the common HTML elements (`Div`, `Span`, `Paragraph`,
-`Heading`, `Anchor`, `Label`, `Image`, `List`/`ListItem`, `Form`, `Button`,
-`Input`, `TextArea`, `Select`/`Option`). Not ported: `Ooui.Forms` (Xamarin.Forms
-renderers) and `Ooui.Wasm` (Mono/WebAssembly client) — neither has a TS/browser
-equivalent.
+inline styles, a `classList` (`TokenList`, DOMTokenList-alike), and the common
+HTML elements (`Div`, `Span`, `Paragraph`, `Heading`, `Anchor`, `Label`,
+`Image`, `List`/`ListItem`, `Form`, `Button`, `Input`, `TextArea`,
+`Select`/`Option`). Not ported: `Ooui.Forms` (Xamarin.Forms renderers) and
+`Ooui.Wasm` (Mono/WebAssembly client) — neither has a TS/browser equivalent.
+
+The example app pulls in [Tailwind's Play CDN](https://tailwindcss.com/docs/installation/play-cdn)
+by default (`UI.headHtml`) for zero-build styling — fine for a demo, swap it
+for a real stylesheet (`UI.setHeadHtml(...)`) before shipping anything real.
 
 ## Run the example
 
@@ -48,3 +52,10 @@ await UI.start()
 Every connected browser tab gets its own `WebSocketSession`; if you publish a
 shared element instance (like the C# sample's `UI.Publish(path, element)`
 overload) rather than a factory, all tabs share the same state.
+
+`classList` works like the browser's, and stays in sync with `className`:
+
+```ts
+button.classList.add('bg-blue-600', 'text-white', 'rounded')
+button.classList.toggle('opacity-50', isDisabled)
+```

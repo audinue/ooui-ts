@@ -1,6 +1,7 @@
 import { Node } from './Node'
 import { Message } from './Message'
 import { Style } from './Style'
+import { TokenList } from './TokenList'
 import type { TargetEventHandler, MessageSentHandler } from './EventTarget'
 
 /** Minimal shape Element needs from Document, to avoid a circular import (Document -> Body -> Element). */
@@ -17,9 +18,15 @@ export abstract class Element extends Node {
   private readonly attributes = new Map<string, unknown>()
   private _style = new Style()
   private _document: DocumentLike | null = null
+  private readonly _classList: TokenList
 
   get style(): Style {
     return this._style
+  }
+
+  /** DOMTokenList-alike view of the `class` attribute, kept in sync both ways with className. */
+  get classList(): TokenList {
+    return this._classList
   }
 
   get className(): string {
@@ -27,6 +34,7 @@ export abstract class Element extends Node {
   }
   set className(value: string) {
     this.setAttributeProperty('class', value, 'className')
+    this._classList.value = value
   }
 
   get title(): string {
@@ -61,6 +69,10 @@ export abstract class Element extends Node {
     super(tagName)
     this.style.onPropertyChanged(cssName => {
       this.sendSet(`style.${jsStyleName(cssName)}`, this.style.get(cssName))
+    })
+    this._classList = new TokenList(this.getStringAttribute('class', ''))
+    this._classList.onChange(value => {
+      this.setAttributeProperty('class', value, 'className')
     })
   }
 

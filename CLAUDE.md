@@ -26,7 +26,7 @@ class names, method names, and message protocol closely by design.
 ```
 src/
   core/         EventTarget -> Node -> Element base classes, Document/Window/Body,
-                the wire Message type, and inline Style.
+                the wire Message type, inline Style, and TokenList (classList).
   elements/     Concrete HTML elements (Div, Button, Input, Form, Select, ...).
   server/       Session (message-queueing), WebSocketSession (Bun websocket glue),
                 UI (Bun.serve, route publishing, HTML template, client bundling).
@@ -71,6 +71,23 @@ before referencing it in an outgoing message, so a freshly-connected or
 reconnecting client always gets a self-consistent stream — mirrors
 `Ooui/Session.cs` exactly; if you're touching this file, read the C# original
 first, the ordering logic is subtle.
+
+### `classList` (`TokenList`)
+
+Not in the original C# (`Ooui/Element.cs` only ever had a plain-string
+`ClassName`) — this is new in the port, added because `className = "a b c"`
+string-building gets old fast once you're actually styling things (see the
+Tailwind swap below). `TokenList` (`src/core/TokenList.ts`) is a
+DOMTokenList-alike with no wire awareness of its own: `Element` wires it up
+in its constructor by seeding it from the current `class` attribute and
+routing its `onChange` back through the _existing_ `className` setter
+(`Element.ts`). That's deliberate — it means `classList.add()`/`.toggle()`/
+etc. produce ordinary `setAttr` messages for `class`, so they're
+automatically reconnect-safe (state-message dedup already handles `setAttr`,
+see above) with zero new protocol surface. Don't add a dedicated
+`classList.add`/`.remove` wire message type to make this "more efficient" —
+it would have to duplicate the reconnect-replay handling that `setAttr`
+already gets for free.
 
 ### Circular-import workarounds
 
@@ -203,3 +220,15 @@ Bun) won't ship a broken or stale `dist/`.
 - **Prettier owns formatting** (Standard.js-ish: no semicolons, single
   quotes, no trailing commas). Run `bun run format` before considering a
   change done; don't hand-format to a different style.
+- **Styling defaults to Tailwind, zero-build.** `UI.headHtml`
+  (`src/server/UI.ts`) defaults to the Tailwind
+  [Play CDN](https://tailwindcss.com/docs/installation/play-cdn) script tag
+  (was Bootstrap's CSS link before) — matches the "no build step" philosophy
+  of the rest of this project, and it JIT-compiles classes added at runtime
+  (e.g. via `classList.add` after a click), which a static stylesheet
+  couldn't. It logs a "should not be used in production" console warning by
+  design — that's Tailwind's, not a bug, and expected in
+  `tests/e2e.test.ts`'s console output. `examples/app.ts` uses Tailwind
+  utility classes via `.classList.add(...)` throughout — prefer that over
+  hand-rolled inline `style.*` for anything expressible as a utility class,
+  it's more idiomatic here now and it's what the e2e test asserts against.

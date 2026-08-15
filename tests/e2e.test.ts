@@ -50,28 +50,24 @@ describe('todo sample', () => {
     expect(await page.getByRole('textbox').inputValue()).toBe('')
   })
 
-  test('clicking an item toggles its done style via the server', async () => {
+  test('clicking an item toggles its done classList via the server', async () => {
+    // TodoItem.isDone drives label.classList.toggle(...) server-side; this
+    // proves those mutations round-trip over the wire as real class changes,
+    // not just that the server-side TokenList itself works.
     const item = page.getByRole('listitem').filter({ hasText: 'Buy milk' })
     const label = item.locator('div')
 
-    expect(
-      await label.evaluate(el => getComputedStyle(el).textDecorationLine)
-    ).toBe('none')
+    expect(await label.getAttribute('class')).not.toContain('line-through')
 
     await item.click()
-    await page.waitForFunction(() => {
-      const el = document.querySelector('li div')
-      return (
-        el != null && getComputedStyle(el).textDecorationLine === 'line-through'
-      )
-    })
+    await page.waitForFunction(() =>
+      document.querySelector('li div')?.className.includes('line-through')
+    )
 
-    expect(await label.evaluate(el => getComputedStyle(el).color)).toBe(
-      'rgb(153, 153, 153)'
-    )
-    expect(await label.evaluate(el => getComputedStyle(el).fontWeight)).toBe(
-      '400'
-    )
+    const doneClass = await label.getAttribute('class')
+    expect(doneClass).toContain('line-through')
+    expect(doneClass).toContain('text-gray-400')
+    expect(doneClass).not.toContain('font-bold')
   })
 
   test('clear completed removes done items via the server', async () => {
