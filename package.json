@@ -1,0 +1,46 @@
+{
+  "name": "@audinue/ooui",
+  "version": "0.1.0",
+  "description": "TypeScript/Bun port of Ooui (https://github.com/praeclarum/ooui) — server-side DOM synced to the browser over WebSocket.",
+  "keywords": [
+    "ooui",
+    "websocket",
+    "server-side-dom",
+    "bun",
+    "ssr"
+  ],
+  "private": false,
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "bun": ">=1.3.0"
+  },
+  "scripts": {
+    "example": "bun run examples/app.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.tests.json",
+    "format": "prettier --write .",
+    "build": "bunup",
+    "prepublishOnly": "bun run typecheck && bun run test && bun run build"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14",
+    "bunup": "^0.16.32",
+    "playwright": "^1.62.1",
+    "prettier": "^3.9.6",
+    "typescript": "^7.0.2"
+  }
+}

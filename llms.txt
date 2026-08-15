@@ -1,0 +1,54 @@
+# @audinue/ooui
+
+> TypeScript/Bun port of [Ooui](https://github.com/praeclarum/ooui): define your
+> UI as a server-side tree of `Element` objects, and Ooui keeps a real browser
+> DOM in sync with it over a WebSocket. All state and logic live on the
+> server; the browser runs only a small (~250-line) client that applies patch
+> messages and reports events back. No virtual DOM, no client build step, no
+> client-side framework.
+
+Requires the [Bun](https://bun.sh) runtime — the server uses `Bun.serve`,
+`Bun.build`, `Bun.file`, and `Bun.CryptoHasher` directly and has no Node.js
+fallback. Only the core element model was ported from the original C#
+project; `Ooui.Forms` (Xamarin.Forms) and `Ooui.Wasm` (Mono/WebAssembly) were
+intentionally left out — they have no TypeScript/browser equivalent.
+
+## Docs
+
+- [README.md](README.md): install, quick-start example, and the
+  publish-a-shared-vs-per-tab-element distinction.
+- [CLAUDE.md](CLAUDE.md): architecture (message protocol, session/throttling
+  model, circular-import workarounds), directory layout, and the reasoning
+  behind the three separate tsconfigs and the build step.
+
+## API surface
+
+- [src/index.ts](src/index.ts): the full public export list — core classes
+  (`EventTarget`, `Node`, `Element`, `Document`, `Window`, `Body`, `Style`,
+  `Message`), HTML elements (`Div`, `Span`, `Paragraph`, `Heading`, `Anchor`,
+  `Label`, `Image`, `List`, `ListItem`, `Form`, `FormControl`, `Button`,
+  `Input`, `TextArea`, `Select`, `Option`, `TextNode`), and the server API
+  (`UI.publish`, `UI.start`, `Session`, `WebSocketSession`).
+- [src/core/Message.ts](src/core/Message.ts): the wire protocol — every
+  server → client mutation and client → server event is one of `create`,
+  `set`, `setAttr`, `remAttr`, `call`, `listen`, `event`.
+- [src/server/UI.ts](src/server/UI.ts): `UI.publish(path, elementOrCtor)` to
+  register a route, `UI.start()` to boot the Bun websocket server.
+
+## Examples
+
+- [examples/app.ts](examples/app.ts): a runnable app with two samples — a
+  shared click counter and a shared todo list — plus an index page. Run with
+  `bun run example`.
+- [tests/e2e.test.ts](tests/e2e.test.ts): headless-browser tests
+  (bun:test + playwright) that exercise the same samples end-to-end and
+  double as protocol usage examples (add/remove children, toggle styles,
+  read back DOM state after a server-side mutation).
+
+## Optional
+
+- [package.json](package.json): scripts (`build`, `test`, `typecheck`,
+  `format`, `example`) and the npm `exports`/`files` shape.
+- [../ooui-main](../ooui-main) (sibling directory, not part of this package):
+  the original C# Ooui source this port mirrors class-for-class and
+  message-for-message.
